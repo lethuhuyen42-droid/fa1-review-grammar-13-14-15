@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crabby's Grammar Beach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sand:#FFE9A8; --sand-deep:#FFD35C;
+    --sea:#00C2D1; --sea-deep:#0089A8;
+    --coral:#FF5C7A; --coral-deep:#E8305A;
+    --sun:#FFD400; --leaf:#1FD478;
+    --ink:#123A44; --paper:#FFFDF6;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: border-box;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top: env(safe-area-inset-top, 0px);}
+  body{
+    margin:0; min-height:100%;
+    font-family:'Baloo 2',sans-serif;
+    background:
+      radial-gradient(circle at 15% 8%, #FFF2B0 0%, transparent 42%),
+      radial-gradient(circle at 85% 92%, #B6FFEA 0%, transparent 40%),
+      linear-gradient(180deg,#3FD7F0 0%, #23C7EE 18%, var(--sand) 46%, var(--sand-deep) 100%);
+    color:var(--ink);
+    display:flex; justify-content:center;
+    overflow-x:hidden;
+  }
+  .stage{
+    width:100%; max-width:640px;
+    min-height:100vh;
+    padding:22px 18px 36px;
+    position:relative;
+  }
+  .waves{
+    position:absolute; top:0; left:0; right:0; height:130px;
+    background:repeating-linear-gradient(115deg, rgba(255,255,255,.35) 0 14px, transparent 14px 30px);
+    opacity:.5; pointer-events:none;
+  }
+  h1{
+    font-family:'Fredoka',sans-serif; font-weight:700;
+    font-size:clamp(26px,7vw,38px);
+    text-align:center; margin:6px 0 2px;
+    color:var(--sea-deep);
+    text-shadow:2px 2px 0 #fff;
+  }
+  .subtitle{
+    text-align:center; font-size:15px; color:var(--sea-deep);
+    opacity:.8; margin-bottom:18px;
+  }
+  .card{
+    background:var(--paper);
+    border-radius:26px;
+    padding:26px 22px;
+    border:4px solid #fff;
+    box-shadow:0 10px 0 var(--sea-deep), 0 14px 28px rgba(0,120,140,.22);
+    position:relative;
+  }
+  .crab{
+    font-size:54px; text-align:center; margin-bottom:4px;
+    animation:bob 2.6s ease-in-out infinite;
+    filter:drop-shadow(0 6px 4px rgba(0,0,0,.12));
+  }
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
+  .screen{display:none;}
+  .screen.active{display:block;}
+  p.lead{font-size:16px; text-align:center; line-height:1.5; margin:8px 0 20px;}
+  button{
+    font-family:'Fredoka',sans-serif; font-weight:600; font-size:16px;
+    border:none; cursor:pointer; border-radius:16px;
+    padding:14px 20px;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  button:active{transform:translateY(2px);}
+  .btn-main{
+    display:block; margin:0 auto; color:#fff;
+    background:linear-gradient(180deg,#FF7A93,var(--coral)); box-shadow:0 6px 0 var(--coral-deep);
+    padding:14px 34px; font-size:18px;
+  }
+  .btn-main:hover{filter:brightness(1.08)}
+  .progress-row{
+    display:flex; align-items:center; gap:10px; margin-bottom:16px;
+  }
+  .progress-track{
+    flex:1; height:14px; background:#FFF0C2; border-radius:8px; overflow:hidden;
+    border:2px solid #FFD35C;
+  }
+  .progress-fill{
+    height:100%; background:linear-gradient(90deg,var(--leaf),var(--sea));
+    border-radius:8px; width:0%; transition:width .35s ease;
+  }
+  .qnum{font-size:13px; font-weight:700; color:var(--sea-deep); white-space:nowrap;}
+  .prompt-label{
+    font-size:12px; font-weight:700; letter-spacing:.02em;
+    color:#fff; background:linear-gradient(90deg,var(--sea),var(--leaf)); display:inline-block;
+    padding:5px 12px; border-radius:10px; margin-bottom:10px;
+  }
+  .qtext{font-size:19px; font-weight:600; line-height:1.45; margin-bottom:18px;}
+  .qtext em{color:var(--coral-deep); font-style:normal; border-bottom:3px dotted var(--coral);}
+  .options{display:grid; gap:12px;}
+  .opt{
+    background:#FFF3D6; border:3px solid #FFCF66; border-radius:16px;
+    padding:13px 16px; font-size:16px; font-weight:600; text-align:left;
+    color:var(--ink);
+  }
+  .opt:hover{border-color:var(--sea); background:#DFF9FF;}
+  .opt.correct{background:#CFFCE3; border-color:var(--leaf); color:#0E7A45;}
+  .opt.wrong{background:#FFDCE2; border-color:var(--coral); color:var(--coral-deep);}
+  .opt[disabled]{cursor:default;}
+  .feedback{
+    margin-top:14px; font-weight:700; font-size:15px; min-height:22px;
+    text-align:center;
+  }
+  .feedback.good{color:#0E7A45;}
+  .feedback.bad{color:var(--coral-deep);}
+  .footer-btn{margin-top:18px; text-align:center;}
+  .score-hero{
+    text-align:center; margin:6px 0 14px;
+  }
+  .score-num{
+    font-family:'Fredoka',sans-serif; font-weight:700;
+    font-size:64px; color:var(--sea-deep); line-height:1;
+  }
+  .score-of{font-size:20px; color:var(--sea-deep); opacity:.75;}
+  .score-msg{text-align:center; font-size:17px; margin:6px 0 20px; font-weight:600;}
+  .review{
+    background:#FFF3D6; border-radius:16px; padding:14px 16px; margin-bottom:10px;
+    border-left:6px solid var(--coral);
+  }
+  .review .rq{font-weight:700; margin-bottom:6px;}
+  .review .ra{font-size:14px; margin:2px 0;}
+  .review .ra.you{color:var(--coral-deep);}
+  .review .ra.right{color:#0E7A45;}
+  .review-title{font-weight:700; font-size:17px; margin:18px 0 10px; color:var(--sea-deep);}
+  .score-sub{text-align:center; font-size:13px; color:var(--sea-deep); opacity:.85; margin-top:-8px; margin-bottom:10px;}
+  .all-correct{
+    text-align:center; background:#CFFCE3; border-radius:16px; padding:16px; color:#0E7A45; font-weight:700;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#233A40; --ink:#F2ECDD; --sand:#3A4A42; --sand-deep:#2C3B36;
+    }
+    body{background:linear-gradient(180deg,#123038 0%,#1B4048 20%, var(--sand) 46%, var(--sand-deep) 100%);}
+    .opt{background:#2E4A4E; border-color:#3E5D60; color:var(--ink);}
+    .prompt-label{background:#2E4A4E;}
+    .review{background:#2E4A4E;}
+  }
+  :root[data-theme="dark"]{
+    --paper:#233A40; --ink:#F2ECDD; --sand:#3A4A42; --sand-deep:#2C3B36;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="waves"></div>
+  <h1>Crabby's Grammar Beach</h1>
+  <div class="subtitle">Help Crabby collect shells across 15 questions!</div>
+
+  <div class="card">
+
+    <!-- START -->
+    <div class="screen active" id="screen-start">
+      <div class="crab">🦀</div>
+      <p class="lead">Crabby needs your help with English grammar!<br>Answer 15 questions from the beach classroom. Get it right, earn a shell. Ready?</p>
+      <button class="btn-main" onclick="startGame()">Start the Game 🐚</button>
+    </div>
+
+    <!-- QUESTION -->
+    <div class="screen" id="screen-quiz">
+      <div class="progress-row">
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="qnum" id="qnum">Q1 / 10</div>
+      </div>
+      <div class="prompt-label" id="qtopic">TOPIC</div>
+      <div class="qtext" id="qtext">Question text</div>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="footer-btn" id="nextWrap" style="display:none;">
+        <button class="btn-main" id="nextBtn" onclick="nextQuestion()">Next 🦀</button>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="screen" id="screen-result">
+      <div class="crab" id="resultCrab">🎉</div>
+      <div class="score-hero">
+        <span class="score-num" id="finalScore">0</span><span class="score-of">/10 shells</span>
+      </div>
+      <div class="score-sub" id="scoreSub"></div>
+      <div class="score-msg" id="scoreMsg"></div>
+      <div id="reviewArea"></div>
+      <div class="footer-btn"><button class="btn-main" onclick="restartGame()">Play Again 🌊</button></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    topic: "There is / There are",
+    text: "<em>___</em> a teacher in the classroom.",
+    options: ["There is","There are"],
+    correct: 0
+  },
+  {
+    topic: "Third person -s",
+    text: "She <em>study</em> very hard every day. Choose the correct verb.",
+    options: ["study","studies","studying"],
+    correct: 1
+  },
+  {
+    topic: "-ing form",
+    text: "He is <em>play</em> football right now. Choose the correct verb.",
+    options: ["play","plays","playing"],
+    correct: 2
+  },
+  {
+    topic: "Present simple",
+    text: "Jack <em>___</em> DVDs every weekend.",
+    options: ["watch","watches","watching"],
+    correct: 1
+  },
+  {
+    topic: "Negative form",
+    text: "Make it negative: <em>I'm reading a book.</em>",
+    options: ["I don't reading a book.","I'm not reading a book.","I'm no reading a book."],
+    correct: 1
+  },
+  {
+    topic: "Present continuous",
+    text: "My sister <em>___</em> (paint) a picture at the park.",
+    options: ["paints","is painting","painting"],
+    correct: 1
+  },
+  {
+    topic: "Can / can't",
+    text: "Fish live in water. Fish <em>___</em> fly.",
+    options: ["can","can't"],
+    correct: 1
+  },
+  {
+    topic: "Question word order",
+    text: "Put the words in order: <em>you / study maths / do</em>",
+    options: ["You do study maths?","Do you study maths?","Study you do maths?"],
+    correct: 1
+  },
+  {
+    topic: "Adverbs of frequency",
+    text: "Which word means something happens 100% of the time?",
+    options: ["sometimes","never","always"],
+    correct: 2
+  },
+  {
+    topic: "Reading: The Crab",
+    text: "From the story: how many legs has a crab got?",
+    options: ["Six legs","Eight legs","Ten legs"],
+    correct: 2
+  },
+  {
+    topic: "-ing form",
+    text: "Put the verb into the V-ing form: <em>swim</em> →",
+    options: ["swiming","swimming","swimeing"],
+    correct: 1
+  },
+  {
+    topic: "Negative form",
+    text: "Make it negative: <em>The boy is running.</em>",
+    options: ["The boy isn't running.","The boy don't running.","The boy not running."],
+    correct: 0
+  },
+  {
+    topic: "Present continuous",
+    text: "Look at my dad. He <em>___</em> (write) an email.",
+    options: ["writes","is writing","write"],
+    correct: 1
+  },
+  {
+    topic: "Question word order",
+    text: "Put the words in order: <em>does / read books / Cathy</em>",
+    options: ["Does Cathy read books?","Cathy does read books?","Read Cathy does books?"],
+    correct: 0
+  },
+  {
+    topic: "Reading: The Crab",
+    text: "From the story: can crabs run?",
+    options: ["Yes, they can.","No, they can't.","They can only swim."],
+    correct: 0
+  }
+];
+
+let current = 0, score = 0, answers = [];
+
+function startGame(){
+  current = 0; score = 0; answers = [];
+  show('screen-quiz');
+  renderQuestion();
+}
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[current];
+  document.getElementById('qnum').textContent = `Q${current+1} / ${QUESTIONS.length}`;
+  document.getElementById('progressFill').style.width = (current/QUESTIONS.length*100)+'%';
+  document.getElementById('qtopic').textContent = q.topic;
+  document.getElementById('qtext').innerHTML = q.text;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('nextWrap').style.display = 'none';
+
+  const optWrap = document.getElementById('options');
+  optWrap.innerHTML = '';
+  q.options.forEach((opt, i)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.textContent = opt;
+    b.onclick = ()=>selectAnswer(i);
+    optWrap.appendChild(b);
+  });
+}
+
+function selectAnswer(i){
+  const q = QUESTIONS[current];
+  const buttons = document.querySelectorAll('.opt');
+  buttons.forEach(b=>b.disabled = true);
+
+  const correct = i === q.correct;
+  buttons[i].classList.add(correct ? 'correct' : 'wrong');
+  if(!correct){ buttons[q.correct].classList.add('correct'); }
+
+  const fb = document.getElementById('feedback');
+  if(correct){
+    score++;
+    fb.textContent = "Nice one! Crabby found a shell! 🐚";
+    fb.className = 'feedback good';
+  } else {
+    fb.textContent = "Not quite — see the right answer above.";
+    fb.className = 'feedback bad';
+  }
+
+  answers.push({
+    topic: q.topic,
+    question: q.text,
+    yourAnswer: q.options[i],
+    correctAnswer: q.options[q.correct],
+    isCorrect: correct
+  });
+
+  document.getElementById('nextWrap').style.display = 'block';
+}
+
+function nextQuestion(){
+  current++;
+  if(current >= QUESTIONS.length){
+    finishGame();
+  } else {
+    renderQuestion();
+  }
+}
+
+function finishGame(){
+  document.getElementById('progressFill').style.width = '100%';
+  show('screen-result');
+  const scaled = Math.round(score / QUESTIONS.length * 10);
+  document.getElementById('finalScore').textContent = scaled;
+  document.getElementById('scoreSub').textContent = `(${score} out of ${QUESTIONS.length} correct)`;
+
+  let crab = '🎉', msg = '';
+  if(scaled === 10){ crab='🏆'; msg="Perfect catch! Crabby is doing a happy dance!"; }
+  else if(scaled >= 8){ crab='🌟'; msg="Awesome! You're a grammar star on the beach!"; }
+  else if(scaled >= 5){ crab='🐚'; msg="Good job! A few more waves of practice and you'll shine!"; }
+  else { crab='🌊'; msg="Nice try! Crabby says: let's review and try again!"; }
+  document.getElementById('resultCrab').textContent = crab;
+  document.getElementById('scoreMsg').textContent = msg;
+
+  const wrong = answers.filter(a=>!a.isCorrect);
+  const reviewArea = document.getElementById('reviewArea');
+  if(wrong.length === 0){
+    reviewArea.innerHTML = '<div class="all-correct">You got every question right — amazing! 🎊</div>';
+  } else {
+    let html = '<div class="review-title">Let\'s review 🔍</div>';
+    wrong.forEach(a=>{
+      html += `<div class="review">
+        <div class="rq">${a.topic}: ${a.question}</div>
+        <div class="ra you">Your answer: ${a.yourAnswer}</div>
+        <div class="ra right">Correct answer: ${a.correctAnswer}</div>
+      </div>`;
+    });
+    reviewArea.innerHTML = html;
+  }
+}
+
+function restartGame(){
+  show('screen-start');
+}
+</script>
+</body>
+</html>
